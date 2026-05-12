@@ -1,11 +1,11 @@
 {
   "domain": "owlwatt",
   "name": "OwlWatt",
-  "version": "0.1.0",
-  "documentation": "https://owlwatt.com/ha",
-  "issue_tracker": "https://github.com/obeauche/owlwatt-home-assistant/issues",
   "codeowners": ["@obeauche"],
   "config_flow": true,
+  "documentation": "https://owlwatt.com/ha",
   "iot_class": "cloud_polling",
-  "requirements": ["aiohttp>=3.8.0"]
+  "issue_tracker": "https://github.com/obeauche/owlwatt-home-assistant/issues",
+  "requirements": ["aiohttp>=3.8.0"],
+  "version": "0.1.0"
 }
