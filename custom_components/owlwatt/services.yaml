@@ -4,3 +4,14 @@ refresh:
     Forces an immediate refresh from the OwlWatt cloud, bypassing the
     normal 5-minute poll. Useful in automations after you take an action
     that should change production (e.g. cleaning panels, repairing a string).
+
+create_share_link:
+  name: Create OwlWatt share link
+  description: >
+    Creates a 7-day public share link for your OwlWatt solar card.
+    The link renders a PNG showing today's production vs expected and
+    a qualitative status badge (Healthy / Underperforming / Anomaly detected).
+    Your address is anonymized — only a regional label is shown.
+    No financial claim values are included in the shared image.
+    The share URL is sent to you via a Home Assistant persistent notification.
+  fields: {}

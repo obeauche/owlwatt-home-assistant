@@ -349,3 +349,13 @@ def install_stubs() -> None:
         vol.Schema = Schema
         vol.Required = Required
         sys.modules["voluptuous"] = vol
+
+    # homeassistant.components.persistent_notification
+    def async_create(hass, message="", title="", notification_id=None):
+        pass  # no-op stub; tests that care mock this explicitly
+
+    ha_pn = _make_module(
+        "homeassistant.components.persistent_notification",
+        async_create=async_create,
+    )
+    sys.modules["homeassistant.components.persistent_notification"] = ha_pn

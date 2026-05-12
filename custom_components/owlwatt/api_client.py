@@ -179,3 +179,13 @@ class OwlWattApiClient:
     async def get_roof_before_image_bytes(self) -> Optional[bytes]:
         """GET /api/ha/v1/roof/before — pre-install reference image bytes (paid tier)."""
         return await self._request_bytes("/api/ha/v1/roof/before")
+
+    async def create_share_link(self) -> dict:
+        """POST /api/ha/v1/share — mint a 7-day signed share URL.
+
+        Returns {"url": "...", "token": "...", "expires_at": "..."}.
+        The share URL is PUBLIC — anyone with it can view the PNG.
+        No financial claim values are included in the shared image (C2).
+        """
+        result = await self._request("POST", "/api/ha/v1/share")
+        return result if isinstance(result, dict) else {}
