@@ -2,10 +2,11 @@
 
 DOMAIN = "owlwatt"
 
-# Default cloud API base URL.  Points directly to the Fly.io app while
-# owlwatt.com TLS cert coverage is confirmed.  Change to "https://owlwatt.com"
-# once the cert covers the API subdomain (parent session decision).
-DEFAULT_API_BASE = "https://owlwatt-api.fly.dev"
+# Default cloud API base URL — customer-facing canonical owlwatt.com.
+# Routes the same Fly backend through Cloudflare (dual-stack IPv4+IPv6).
+# We previously pointed straight at owlwatt-api.fly.dev which resolves IPv6
+# only and fails for HA instances on IPv4-only networks.
+DEFAULT_API_BASE = "https://owlwatt.com"
 
 # How often to poll the cloud snapshot endpoint.
 DEFAULT_POLL_INTERVAL_MINUTES = 5
