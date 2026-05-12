@@ -35,5 +35,68 @@
       "already_configured": "This OwlWatt account is already set up.",
       "external_setup": "Complete signup at owlwatt.com, then come back and choose 'I have an OwlWatt account'."
     }
+  },
+  "entity": {
+    "sensor": {
+      "production_now": {
+        "name": "Solar production right now"
+      },
+      "production_today": {
+        "name": "Solar production today"
+      },
+      "production_month": {
+        "name": "Solar production this month"
+      },
+      "expected_today": {
+        "name": "Expected solar today"
+      },
+      "expected_month": {
+        "name": "Expected solar this month"
+      },
+      "shortfall_today_pct": {
+        "name": "Solar shortfall today (percent)"
+      },
+      "shortfall_month_pct": {
+        "name": "Solar shortfall this month (percent)"
+      },
+      "shortfall_month_kwh": {
+        "name": "Solar shortfall this month (kWh)"
+      },
+      "data_freshness": {
+        "name": "OwlWatt data freshness"
+      },
+      "subscription_tier": {
+        "name": "OwlWatt subscription"
+      },
+      "trial_days_remaining": {
+        "name": "OwlWatt trial days remaining"
+      },
+      "claim_value_low_usd": {
+        "name": "Documented shortfall value (low)"
+      },
+      "claim_value_high_usd": {
+        "name": "Documented shortfall value (high)"
+      },
+      "claim_value_display_text": {
+        "name": "Documented shortfall value"
+      },
+      "claim_status": {
+        "name": "Claim status"
+      },
+      "active_claims_count": {
+        "name": "Open claims"
+      },
+      "anomaly_label": {
+        "name": "Anomaly detail"
+      }
+    },
+    "binary_sensor": {
+      "data_stale": {
+        "name": "OwlWatt data is stale"
+      },
+      "anomaly_active": {
+        "name": "Solar anomaly"
+      }
+    }
   }
 }
