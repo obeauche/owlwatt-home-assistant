@@ -1,0 +1,39 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up OwlWatt",
+        "description": "OwlWatt measures whether your solar produces what it was promised to. Choose how you want to set it up.",
+        "menu_options": {
+          "token": "I have an OwlWatt account",
+          "no_account": "I don't have an account yet"
+        }
+      },
+      "token": {
+        "title": "Connect to your OwlWatt account",
+        "description": "Paste the API token from your OwlWatt account settings.\n\nDon't have one yet? Go to owlwatt.com -> Account Settings -> Home Assistant -> Create API token.",
+        "data": {
+          "token": "API token"
+        },
+        "data_description": {
+          "token": "Paste the full token. It is shown only once when created at owlwatt.com."
+        }
+      },
+      "no_account": {
+        "title": "Start your OwlWatt trial",
+        "description": "OwlWatt offers a 30-day free trial (credit card required). After you complete signup at owlwatt.com, return here and choose 'I have an OwlWatt account' to finish setup.\n\nOpening owlwatt.com/ha in your browser..."
+      }
+    },
+    "error": {
+      "cannot_connect": "Couldn't reach the OwlWatt cloud. Check your internet connection and try again.",
+      "invalid_auth": "That token wasn't accepted. Make sure you copied the entire token from owlwatt.com -> Account Settings -> Home Assistant.",
+      "rate_limited": "Too many setup attempts. Wait a few minutes and try again.",
+      "unknown": "Something went wrong during setup. Please try again or contact support@owlwatt.com.",
+      "already_configured": "This OwlWatt account is already connected to Home Assistant."
+    },
+    "abort": {
+      "already_configured": "This OwlWatt account is already set up.",
+      "external_setup": "Complete signup at owlwatt.com, then come back and choose 'I have an OwlWatt account'."
+    }
+  }
+}
