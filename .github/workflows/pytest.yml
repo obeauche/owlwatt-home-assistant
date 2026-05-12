@@ -19,7 +19,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          pip install homeassistant pytest pytest-asyncio pytest-cov aiohttp
+          pip install homeassistant pytest pytest-asyncio pytest-cov pytest-timeout aiohttp
       - name: Run tests
         run: |
           pytest tests/ -q --timeout=60
