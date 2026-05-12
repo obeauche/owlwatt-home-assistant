@@ -39,6 +39,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     token: str = entry.data[CONF_TOKEN]
     api_base: str = entry.data.get(CONF_API_BASE, DEFAULT_API_BASE)
 
+    # Migration (2026-05-12): early config entries stored api_base as the
+    # internal owlwatt-api.fly.dev hostname, which resolves IPv6-only and
+    # fails for HA instances on IPv4-only networks. Rewrite stale stored
+    # api_bases to the canonical Cloudflare-fronted owlwatt.com URL.
+    if "owlwatt-api.fly.dev" in api_base:
+        log.info(
+            "owlwatt: migrating api_base from %s to %s (Cloudflare dual-stack)",
+            api_base, DEFAULT_API_BASE,
+        )
+        hass.config_entries.async_update_entry(
+            entry,
+            data={**entry.data, CONF_API_BASE: DEFAULT_API_BASE},
+        )
+        api_base = DEFAULT_API_BASE
+
     session = async_get_clientsession(hass)
     api_client = OwlWattApiClient(session, token, api_base)
     coordinator = OwlWattCoordinator(hass, api_client, entry)
