@@ -37,9 +37,9 @@ SENSOR_FRIENDLY_NAMES: dict[str, str] = {
     "data_freshness": "OwlWatt data freshness",
     "subscription_tier": "OwlWatt subscription",
     "trial_days_remaining": "OwlWatt trial days remaining",
-    "claim_value_low_usd": "Documented shortfall value (low)",
-    "claim_value_high_usd": "Documented shortfall value (high)",
-    "claim_value_display_text": "Documented shortfall value",
+    "claim_value_low_usd": "Documented shortfall value — low (paid subscription)",
+    "claim_value_high_usd": "Documented shortfall value — high (paid subscription)",
+    "claim_value_display_text": "Documented shortfall value (paid subscription)",
     "claim_status": "Claim status",
     "active_claims_count": "Open claims",
     "anomaly_label": "Anomaly detail",
@@ -48,4 +48,5 @@ SENSOR_FRIENDLY_NAMES: dict[str, str] = {
 BINARY_SENSOR_FRIENDLY_NAMES: dict[str, str] = {
     "data_stale": "OwlWatt data is stale",
     "anomaly_active": "Solar anomaly",
+    "bill_overdue": "Bill overdue",
 }
