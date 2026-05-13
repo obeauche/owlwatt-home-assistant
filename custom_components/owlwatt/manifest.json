@@ -7,7 +7,7 @@
   "config_flow": true,
   "documentation": "https://owlwatt.com/ha",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/obeauche/owlwatt-home-assistant/issues",
+  "issue_tracker": "https://github.com/owlwatt/owlwatt-home-assistant/issues",
   "requirements": [
     "aiohttp>=3.8.0"
   ],
