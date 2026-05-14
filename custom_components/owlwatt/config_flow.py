@@ -148,8 +148,11 @@ class OwlWattConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class OwlWattOptionsFlow(config_entries.OptionsFlow):
     """Options flow — toggle 'Configure HA Energy automatically' post-setup."""
 
+    # HA 2024.12+ made OptionsFlow.config_entry a getter-only property and
+    # rejects assignment in __init__. Store under a private name; the public
+    # ``self.config_entry`` is bound by the framework after construction.
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(
         self, user_input: Optional[dict[str, Any]] = None
@@ -157,7 +160,7 @@ class OwlWattOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        current = self.config_entry.options.get(CONF_CONFIGURE_HA_ENERGY, False)
+        current = self._config_entry.options.get(CONF_CONFIGURE_HA_ENERGY, False)
         schema = vol.Schema(
             {
                 vol.Optional(CONF_CONFIGURE_HA_ENERGY, default=current): bool,
