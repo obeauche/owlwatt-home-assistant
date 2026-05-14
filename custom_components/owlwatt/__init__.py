@@ -151,36 +151,10 @@ async def _async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> Non
     await hass.config_entries.async_reload(entry.entry_id)
 
 
-async def async_get_solar_forecast(
-    hass: HomeAssistant, config_entry_id: str
-) -> dict | None:
-    """HA Energy `solar_forecast` contract — hourly Wh keyed by ISO timestamp.
-
-    Must live at the integration domain (this module) so HA Energy's
-    discovery sees it — same pattern as Forecast.Solar / Open-Meteo. The
-    cloud snapshot's ``solar_forecast_hourly`` is a list of {ts, wh}; HA
-    expects ``{"wh_hours": {ISO: wh}}``.
-
-    Returns None when no forecast is available so HA hides this entry from
-    the Solar Forecast dropdown.
-    """
-    domain_data = hass.data.get(DOMAIN, {})
-    entry_data = domain_data.get(config_entry_id)
-    if entry_data is None:
-        return None
-    coordinator = entry_data.get("coordinator")
-    if coordinator is None or coordinator.data is None:
-        return None
-    hourly = coordinator.data.get("solar_forecast_hourly") or []
-    if not hourly:
-        return None
-    return {
-        "wh_hours": {
-            entry["ts"]: float(entry["wh"])
-            for entry in hourly
-            if "ts" in entry and "wh" in entry
-        }
-    }
+# Note: ``async_get_solar_forecast`` lives in ``energy.py`` (the HA-discovered
+# sub-platform module), NOT here. HA Energy's discovery scans every integration
+# for a same-named ``energy.py`` module and inspects THAT for the hook —
+# functions on __init__.py are not visible to the forecast scanner.
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
