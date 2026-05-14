@@ -21,12 +21,18 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_URL
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api_client import OwlWattApiClient, OwlWattAuthError, OwlWattApiError, OwlWattRateLimited
-from .const import CONF_API_BASE, CONF_TOKEN, DEFAULT_API_BASE, DOMAIN
+from .const import (
+    CONF_API_BASE,
+    CONF_CONFIGURE_HA_ENERGY,
+    CONF_TOKEN,
+    DEFAULT_API_BASE,
+    DOMAIN,
+)
 
 log = logging.getLogger(__name__)
 
@@ -83,6 +89,9 @@ class OwlWattConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             api_base: str = (
                 user_input.get(CONF_API_BASE) or DEFAULT_API_BASE
             ).rstrip("/")
+            configure_ha_energy: bool = bool(
+                user_input.get(CONF_CONFIGURE_HA_ENERGY, False)
+            )
 
             # Validate token by calling the manifest endpoint
             session = async_get_clientsession(self.hass)
@@ -110,11 +119,15 @@ class OwlWattConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_TOKEN: token,
                         CONF_API_BASE: api_base,
                     },
+                    options={
+                        CONF_CONFIGURE_HA_ENERGY: configure_ha_energy,
+                    },
                 )
 
         schema = vol.Schema(
             {
                 vol.Required(CONF_TOKEN): str,
+                vol.Optional(CONF_CONFIGURE_HA_ENERGY, default=False): bool,
             }
         )
 
@@ -123,3 +136,31 @@ class OwlWattConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=schema,
             errors=errors,
         )
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> "OwlWattOptionsFlow":
+        return OwlWattOptionsFlow(config_entry)
+
+
+class OwlWattOptionsFlow(config_entries.OptionsFlow):
+    """Options flow — toggle 'Configure HA Energy automatically' post-setup."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        self.config_entry = config_entry
+
+    async def async_step_init(
+        self, user_input: Optional[dict[str, Any]] = None
+    ) -> FlowResult:
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        current = self.config_entry.options.get(CONF_CONFIGURE_HA_ENERGY, False)
+        schema = vol.Schema(
+            {
+                vol.Optional(CONF_CONFIGURE_HA_ENERGY, default=current): bool,
+            }
+        )
+        return self.async_show_form(step_id="init", data_schema=schema)

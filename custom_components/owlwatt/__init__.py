@@ -26,8 +26,16 @@ from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api_client import OwlWattApiClient
-from .const import CONF_API_BASE, CONF_TOKEN, DEFAULT_API_BASE, DOMAIN
+from .const import (
+    CONF_API_BASE,
+    CONF_CONFIGURE_HA_ENERGY,
+    CONF_TOKEN,
+    DEFAULT_API_BASE,
+    DOMAIN,
+)
 from .coordinator import OwlWattCoordinator
+from .energy_config import async_configure_ha_energy_if_empty
+from .solar_forecast import async_get_solar_forecast  # noqa: F401 — HA Energy contract
 
 log = logging.getLogger(__name__)
 
@@ -66,6 +74,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     }
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    # ------------------------------------------------------------------
+    # Optional HA Energy auto-configuration (opt-in via options flow).
+    # Idempotent: never clobbers an existing energy_sources config.
+    # ------------------------------------------------------------------
+    if entry.options.get(CONF_CONFIGURE_HA_ENERGY, False):
+        try:
+            await async_configure_ha_energy_if_empty(hass, entry)
+        except Exception as exc:
+            log.warning("owlwatt: HA Energy auto-config skipped: %s", exc)
+
+    # Reload on options change so toggling the HA Energy checkbox takes effect.
+    entry.async_on_unload(entry.add_update_listener(_async_options_updated))
 
     # ------------------------------------------------------------------
     # owlwatt.refresh
@@ -124,6 +145,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.services.async_register(DOMAIN, "create_share_link", _handle_create_share_link)
 
     return True
+
+
+async def _async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Reload the integration so options changes take effect."""
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

@@ -60,6 +60,7 @@ async def async_setup_entry(
         OwlWattProductionNowSensor(coordinator, entry),
         OwlWattProductionTodaySensor(coordinator, entry),
         OwlWattProductionMonthSensor(coordinator, entry),
+        OwlWattSolarLifetimeKwhSensor(coordinator, entry),
         OwlWattExpectedTodaySensor(coordinator, entry),
         OwlWattExpectedMonthSensor(coordinator, entry),
         OwlWattShortfallTodayPctSensor(coordinator, entry),
@@ -174,6 +175,48 @@ class OwlWattProductionMonthSensor(OwlWattBaseSensor):
     @property
     def native_value(self) -> Optional[float]:
         return self._snapshot.get("production", {}).get("month_kwh")
+
+
+class OwlWattSolarLifetimeKwhSensor(OwlWattBaseSensor):
+    """Lifetime cumulative solar production — HA Energy ``stat_energy_from`` source.
+
+    ``state_class=total_increasing`` lets HA's long-term statistics ingest this
+    as an energy meter. HA LTS rejects downward jumps in total_increasing
+    series; on a rare cloud regression (late Enphase correction), we return
+    ``None`` so the sensor reads ``unavailable`` for one tick rather than
+    emitting a downward step. The next stable reading re-anchors the floor.
+    """
+
+    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
+
+    def __init__(self, coordinator: OwlWattCoordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator, entry, "solar_lifetime_kwh")
+        self._last_value: Optional[float] = None
+        self._last_rejected: Optional[float] = None
+
+    @property
+    def native_value(self) -> Optional[float]:
+        new = self._snapshot.get("solar_lifetime_kwh")
+        if new is None:
+            return self._last_value  # snapshot missing field — hold last
+        if self._last_value is None or new >= self._last_value:
+            self._last_value = float(new)
+            self._last_rejected = None
+            return self._last_value
+        # Regression: cloud reported a lower value than last tick.
+        if self._last_rejected is not None and abs(new - self._last_rejected) < 0.01:
+            # Same lower value observed twice — accept as the new floor.
+            self._last_value = float(new)
+            self._last_rejected = None
+            return self._last_value
+        self._last_rejected = float(new)
+        return None  # → STATE_UNAVAILABLE for this tick
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return {"method_label": "Independent measurement"}
 
 
 class OwlWattExpectedTodaySensor(OwlWattBaseSensor):
@@ -366,9 +409,12 @@ class OwlWattClaimValueLowSensor(OwlWattPaidTierSensor):
     C2-compliant: range endpoint, not scalar.
     """
 
+    # device_class=MONETARY + state_class=MEASUREMENT is rejected by HA
+    # (clutters logs each setup). TOTAL is the right pairing for an
+    # accumulating dollar value.
     _attr_device_class = SensorDeviceClass.MONETARY
     _attr_native_unit_of_measurement = "USD"
-    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_state_class = SensorStateClass.TOTAL
 
     def __init__(self, coordinator: OwlWattCoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator, entry, "claim_value_low_usd")
@@ -388,7 +434,7 @@ class OwlWattClaimValueHighSensor(OwlWattPaidTierSensor):
 
     _attr_device_class = SensorDeviceClass.MONETARY
     _attr_native_unit_of_measurement = "USD"
-    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_state_class = SensorStateClass.TOTAL
 
     def __init__(self, coordinator: OwlWattCoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator, entry, "claim_value_high_usd")

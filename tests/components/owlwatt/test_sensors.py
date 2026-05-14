@@ -19,6 +19,7 @@ from custom_components.owlwatt.sensor import (
     OwlWattProductionNowSensor,
     OwlWattProductionTodaySensor,
     OwlWattProductionMonthSensor,
+    OwlWattSolarLifetimeKwhSensor,
     OwlWattExpectedTodaySensor,
     OwlWattExpectedMonthSensor,
     OwlWattShortfallTodayPctSensor,
@@ -218,3 +219,64 @@ def test_method_label_never_pvlib(paid_snapshot):
             assert term not in method_label, (
                 f"{cls.__name__}.method_label contains forbidden term {term!r}: {method_label!r}"
             )
+
+
+# ---------------------------------------------------------------------------
+# Solar lifetime sensor (HA Energy)
+# ---------------------------------------------------------------------------
+
+def test_solar_lifetime_native_value(trial_snapshot):
+    """Lifetime sensor surfaces solar_lifetime_kwh from the snapshot."""
+    from homeassistant.components.sensor import SensorStateClass
+    sensor = _make_sensor(OwlWattSolarLifetimeKwhSensor, trial_snapshot)
+    assert sensor.native_value == 12345.6
+    assert sensor.device_class == SensorDeviceClass.ENERGY
+    assert sensor._attr_state_class == SensorStateClass.TOTAL_INCREASING
+
+
+def test_solar_lifetime_monotonic_guard_rejects_one_regression():
+    """A single downward jump returns None (HA → unavailable) without re-anchoring."""
+    coord = _mock_coordinator({"solar_lifetime_kwh": 100.0})
+    sensor = OwlWattSolarLifetimeKwhSensor(coord, _mock_entry())
+    assert sensor.native_value == 100.0   # first read sets the floor
+    coord.data = {"solar_lifetime_kwh": 95.0}
+    assert sensor.native_value is None    # regression rejected
+    coord.data = {"solar_lifetime_kwh": 101.0}
+    assert sensor.native_value == 101.0   # recovers when cloud catches back up
+
+
+def test_solar_lifetime_re_anchors_after_two_consistent_lower_reads():
+    """If cloud reports the same lower value twice, accept it as the new floor."""
+    coord = _mock_coordinator({"solar_lifetime_kwh": 100.0})
+    sensor = OwlWattSolarLifetimeKwhSensor(coord, _mock_entry())
+    assert sensor.native_value == 100.0
+    coord.data = {"solar_lifetime_kwh": 95.0}
+    assert sensor.native_value is None
+    coord.data = {"solar_lifetime_kwh": 95.0}
+    assert sensor.native_value == 95.0    # re-anchored
+
+
+def test_solar_lifetime_missing_field_holds_last_value():
+    """If a snapshot omits solar_lifetime_kwh, the sensor keeps its last value."""
+    coord = _mock_coordinator({"solar_lifetime_kwh": 100.0})
+    sensor = OwlWattSolarLifetimeKwhSensor(coord, _mock_entry())
+    assert sensor.native_value == 100.0
+    coord.data = {}  # field missing
+    assert sensor.native_value == 100.0
+
+
+# ---------------------------------------------------------------------------
+# Documented shortfall value — state_class must be TOTAL, not MEASUREMENT
+# ---------------------------------------------------------------------------
+
+def test_claim_value_low_state_class_is_total(paid_snapshot):
+    """MEASUREMENT + MONETARY is rejected by HA; must be TOTAL."""
+    from homeassistant.components.sensor import SensorStateClass
+    sensor = _make_sensor(OwlWattClaimValueLowSensor, paid_snapshot)
+    assert sensor._attr_state_class == SensorStateClass.TOTAL
+
+
+def test_claim_value_high_state_class_is_total(paid_snapshot):
+    from homeassistant.components.sensor import SensorStateClass
+    sensor = _make_sensor(OwlWattClaimValueHighSensor, paid_snapshot)
+    assert sensor._attr_state_class == SensorStateClass.TOTAL

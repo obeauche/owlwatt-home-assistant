@@ -15,6 +15,9 @@ DEFAULT_POLL_INTERVAL_MINUTES = 5
 CONF_TOKEN = "token"
 CONF_API_BASE = "api_base"
 
+# ConfigEntry options keys.
+CONF_CONFIGURE_HA_ENERGY = "configure_ha_energy"
+
 # Disclaimer shown as an attribute on every paid-tier claim-value sensor.
 # Text is factual only — no legal claims, no installer blame.
 # Mirrors cloud app/routers/ha_integration.py:MEASUREMENT_DISCLAIMER_SHORT.
@@ -43,6 +46,7 @@ SENSOR_FRIENDLY_NAMES: dict[str, str] = {
     "claim_status": "Claim status",
     "active_claims_count": "Open claims",
     "anomaly_label": "Anomaly detail",
+    "solar_lifetime_kwh": "Solar production lifetime",
 }
 
 BINARY_SENSOR_FRIENDLY_NAMES: dict[str, str] = {

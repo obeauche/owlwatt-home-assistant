@@ -13,10 +13,12 @@
         "title": "Connect to your OwlWatt account",
         "description": "Paste the API token from your OwlWatt account settings.\n\nDon't have one yet? Go to owlwatt.com -> Account Settings -> Home Assistant -> Create API token.",
         "data": {
-          "token": "API token"
+          "token": "API token",
+          "configure_ha_energy": "Configure HA Energy dashboard automatically"
         },
         "data_description": {
-          "token": "Paste the full token. It is shown only once when created at owlwatt.com."
+          "token": "Paste the full token. It is shown only once when created at owlwatt.com.",
+          "configure_ha_energy": "If your Energy dashboard isn't set up yet, OwlWatt can add itself as the Solar production and Forecast source so the dashboard lights up immediately. Existing Energy settings are never modified."
         }
       },
       "no_account": {
@@ -34,6 +36,19 @@
     "abort": {
       "already_configured": "This OwlWatt account is already set up.",
       "external_setup": "Complete signup at owlwatt.com, then come back and choose 'I have an OwlWatt account'."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "OwlWatt options",
+        "data": {
+          "configure_ha_energy": "Configure HA Energy dashboard automatically"
+        },
+        "data_description": {
+          "configure_ha_energy": "If your Energy dashboard isn't set up yet, OwlWatt can add itself as the Solar production and Forecast source so the dashboard lights up immediately. Existing Energy settings are never modified."
+        }
+      }
     }
   },
   "entity": {
@@ -88,6 +103,9 @@
       },
       "anomaly_label": {
         "name": "Anomaly detail"
+      },
+      "solar_lifetime_kwh": {
+        "name": "Solar production lifetime"
       }
     },
     "binary_sensor": {

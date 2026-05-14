@@ -59,10 +59,14 @@ def install_stubs() -> None:
     class ServiceCall:
         pass
 
+    def callback(fn):
+        return fn
+
     ha_core = _make_module(
         "homeassistant.core",
         HomeAssistant=HomeAssistant,
         ServiceCall=ServiceCall,
+        callback=callback,
     )
     sys.modules["homeassistant.core"] = ha_core
 
@@ -70,6 +74,14 @@ def install_stubs() -> None:
     class ConfigEntry:
         entry_id: str = "test"
         data: dict = {}
+        options: dict = {}
+    class OptionsFlow:
+        def __init__(self):
+            self.config_entry = None
+        def async_show_form(self, **kw):
+            return {"type": "form", **kw}
+        def async_create_entry(self, **kw):
+            return {"type": "create_entry", **kw}
     class ConfigFlow:
         hass: "HomeAssistant" = None
         context: dict = {}
@@ -94,6 +106,7 @@ def install_stubs() -> None:
         "homeassistant.config_entries",
         ConfigEntry=ConfigEntry,
         ConfigFlow=ConfigFlow,
+        OptionsFlow=OptionsFlow,
         config_entries=MagicMock(),
     )
     sys.modules["homeassistant.config_entries"] = ha_ce
@@ -346,8 +359,17 @@ def install_stubs() -> None:
                 return hash(self.key)
             def __eq__(self, other):
                 return self.key == other
+        class Optional:
+            def __init__(self, key, default=None):
+                self.key = key
+                self.default = default
+            def __hash__(self):
+                return hash(self.key)
+            def __eq__(self, other):
+                return self.key == other
         vol.Schema = Schema
         vol.Required = Required
+        vol.Optional = Optional
         sys.modules["voluptuous"] = vol
 
     # homeassistant.components.persistent_notification

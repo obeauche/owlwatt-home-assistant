@@ -40,6 +40,12 @@ TRIAL_SNAPSHOT = {
         "tilt_deg": 25,
         "azimuth_deg": 180,
     },
+    "solar_lifetime_kwh": 12345.6,
+    "solar_forecast_hourly": [
+        {"ts": "2026-05-12T13:00:00+00:00", "wh": 4500.0},
+        {"ts": "2026-05-12T14:00:00+00:00", "wh": 4800.0},
+        {"ts": "2026-05-12T15:00:00+00:00", "wh": 4200.0},
+    ],
 }
 
 PAID_SNAPSHOT = {
@@ -82,6 +88,12 @@ PAID_SNAPSHOT = {
         "url_template": "/api/ha/v1/roof/image?ts=<epoch>",
         "last_baked_at": "2026-04-22T10:00:00+00:00",
     },
+    "solar_lifetime_kwh": 12345.6,
+    "solar_forecast_hourly": [
+        {"ts": "2026-05-12T13:00:00+00:00", "wh": 4500.0},
+        {"ts": "2026-05-12T14:00:00+00:00", "wh": 4800.0},
+        {"ts": "2026-05-12T15:00:00+00:00", "wh": 4200.0},
+    ],
 }
 
 
